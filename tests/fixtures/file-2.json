@@ -1,7 +1,10 @@
 {
     "name": "arcanedev/support",
     "description": "ARCANEDEV Support Helpers",
-    "keywords": ["arcanedev", "support"],
+    "keywords": [
+        "arcanedev",
+        "support"
+    ],
     "license": "MIT",
     "authors": [
         {
