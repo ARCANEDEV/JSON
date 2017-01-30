@@ -1,6 +1,7 @@
 <?php namespace Arcanedev\Json\Tests;
 
 use Arcanedev\Json\Json;
+use Arcanedev\Json\Exceptions;
 
 /**
  * Class     JsonTest
@@ -48,11 +49,6 @@ class JsonTest extends TestCase
     {
         $this->assertInstanceOf(Json::class, $this->json);
 
-        $this->assertInstanceOf(
-            \Illuminate\Filesystem\Filesystem::class,
-            $this->json->getFilesystem()
-        );
-
         $this->assertEquals(
             $this->convertFixture($this->fixturePath),
             $this->json->toArray()
@@ -66,14 +62,9 @@ class JsonTest extends TestCase
 
         $this->assertInstanceOf(Json::class, $this->json);
 
-        $this->assertEquals(
-            $this->getFixtureContent($this->fixturePath),
-            $this->json->getContents()
-        );
-
-        $this->assertEquals(
-            $this->getFixtureContent($this->fixturePath),
-            (string) $this->json
+        $this->assertContains(
+            (string) $this->json,
+            $this->getFixtureContent($this->fixturePath)
         );
 
         $this->assertEquals(
@@ -86,23 +77,11 @@ class JsonTest extends TestCase
     }
 
     /** @test */
-    public function it_can_get_and_set_filesystem()
+    public function it_can_instantiate_with_json_content()
     {
-        $this->assertInstanceOf(
-            \Illuminate\Filesystem\Filesystem::class,
-            $this->json->getFilesystem()
-        );
+        $this->json = Json::fromContent('{"foo":"bar"}');
 
-        $mock = $this->prophesize(\Illuminate\Filesystem\Filesystem::class);
-
-        /** @var \Illuminate\Filesystem\Filesystem $filesystem */
-        $filesystem = $mock->reveal();
-        $this->json->setFilesystem($filesystem);
-
-        $this->assertInstanceOf(
-            \Illuminate\Filesystem\Filesystem::class,
-            $this->json->getFilesystem()
-        );
+        $this->assertSame(['foo' => 'bar'], $this->json->toArray());
     }
 
     /** @test */
@@ -150,7 +129,7 @@ class JsonTest extends TestCase
 
         $this->assertEquals(
             $this->getFixtureContent($path),
-            $this->json->getContents()
+            $this->json->loadFile($path)
         );
 
         unlink($path);
@@ -161,17 +140,163 @@ class JsonTest extends TestCase
     {
         $path = $this->getFixturesPath('saved.json');
 
-        $this->assertEquals(5, count($this->json->getAttributes()));
-        $this->assertNotFalse($this->json->setPath($path)->save());
+        $this->assertEquals(5, count($this->json->attributes()));
+
+        $saved = $this->json->setPath($path)->save();
+
+        $this->assertNotFalse($saved);
         $this->assertEquals(
             $this->getFixtureContent($path),
-            $this->json->getContents()
+            $this->json->toJsonPretty()
         );
 
         $this->json->update(['url' => 'https://www.github.com']);
-        $this->assertEquals(6, count($this->json->getAttributes()));
+        $this->assertEquals(6, count($this->json->attributes()));
 
         unlink($path);
+    }
+
+    /**
+     * @test
+     *
+     * @expectedException         \Illuminate\Contracts\Filesystem\FileNotFoundException
+     * @expectedExceptionMessage  File does not exist at path /path/invalid.json
+     */
+    public function it_must_throw_a_file_not_found_exception_on_make_method()
+    {
+        Json::make('/path/invalid.json');
+    }
+
+    /** @test */
+    public function it_can_encode()
+    {
+        $this->assertSame(['test' => 123], Json::decode('{"test":123}'));
+
+        $expected = new \stdClass;
+        $expected->test = 123;
+
+        $this->assertEquals($expected, Json::decode('{"test":123}', false));
+    }
+
+    /**
+     * @test
+     *
+     * @param  string  $json
+     * @param  string  $class
+     *
+     * @dataProvider getDecodeExceptionsData
+     */
+    public function it_can_handle_decode_errors($json, $class, $message)
+    {
+        try {
+            $this->json->decode($json, false, 0, 2);
+        }
+        catch (Exceptions\JsonException $ex) {
+            $this->assertInstanceOf($class, $ex);
+            $this->assertSame($message, $ex->getMessage());
+        }
+    }
+
+    /**
+     * Get the decode exceptions data.
+     *
+     * @return array
+     */
+    public function getDecodeExceptionsData()
+    {
+        return [
+            // #0
+            [
+                '[[1]]',
+                Exceptions\Decode\DecodeDepthException::class,
+                'The maximum stack depth of 2 was exceeded.',
+            ],
+            // #1
+            [
+                '[1}',
+                Exceptions\Decode\StateMismatchException::class,
+                'The value is not JSON or is malformed.',
+            ],
+            // #2
+            [
+                '["'.chr(0).'test"]',
+                Exceptions\Decode\ControlCharacterException::class,
+                'An unexpected control character was found.',
+            ],
+            // #3
+            [
+                '[',
+                Exceptions\Decode\SyntaxException::class,
+                'The encoded JSON value has a syntax error.',
+            ],
+            // #4
+            [
+                '["'.chr(193).'"]',
+                Exceptions\Decode\UTF8Exception::class,
+                'The encoded JSON value contains invalid UTF-8 characters.',
+            ],
+        ];
+    }
+
+    /**
+     * @test
+     *
+     * @param  mixed   $content
+     * @param  string  $class
+     * @param  string  $message
+     *
+     * @dataProvider getEncodeExceptionsData
+     */
+    public function it_can_handle_encode_errors($content, $class, $message)
+    {
+        try {
+            $this->json->encode($content, 0, 5);
+        }
+        catch (Exceptions\JsonException $ex) {
+            $this->assertInstanceOf($class, $ex);
+            $this->assertSame($message, $ex->getMessage());
+        }
+    }
+
+    /**
+     * Get the encode exceptions data.
+     *
+     * @return array
+     */
+    public function getEncodeExceptionsData()
+    {
+        return [
+            // #0
+            [
+                [[[[[[1]]]]]],
+                Exceptions\Encode\EncodeDepthException::class,
+                'The maximum stack depth of 5 was exceeded.',
+            ],
+            // #1
+            [
+                call_user_func(
+                    function () {
+                        $value = (object) [];
+                        $value->value = $value;
+                        return $value;
+                    }
+                ),
+                Exceptions\Encode\RecursionException::class,
+                'A recursive object was found and partial output is not enabled.',
+            ],
+            // #2
+            [
+                INF,
+                Exceptions\Encode\InfiniteOrNotANumberException::class,
+                'An INF or NAN value was found an partial output is not enabled.',
+            ],
+            // #3
+            [
+                STDIN,
+                Exceptions\Encode\UnsupportedTypeException::class,
+                'An unsupported value type was found an partial output is not enabled.',
+            ]
+        ];
     }
 
     /* ------------------------------------------------------------------------------------------------
