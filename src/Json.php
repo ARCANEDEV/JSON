@@ -144,10 +144,7 @@ class Json implements Arrayable, Jsonable, JsonSerializable
      */
     public function update(array $data)
     {
-        $this->attributes = new Collection(array_merge(
-            $this->attributes->toArray(),
-            $data
-        ));
+        $this->attributes = $this->attributes->merge($data);
 
         return $this->save();
     }
