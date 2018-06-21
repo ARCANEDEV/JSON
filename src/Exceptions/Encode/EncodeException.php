@@ -10,10 +10,11 @@ use Arcanedev\Json\Exceptions\JsonException;
  */
 class EncodeException extends JsonException
 {
-    /* ------------------------------------------------------------------------------------------------
+    /* -----------------------------------------------------------------
      |  Properties
-     | ------------------------------------------------------------------------------------------------
+     | -----------------------------------------------------------------
      */
+
     /** @var string */
     protected $message = 'An unrecognized encoding error was encountered: :last_error_msg';
 }

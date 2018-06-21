@@ -15,10 +15,11 @@ use JsonSerializable;
  */
 class Json implements JsonContract, Arrayable, Jsonable, JsonSerializable
 {
-    /* ------------------------------------------------------------------------------------------------
+    /* -----------------------------------------------------------------
      |  Properties
-     | ------------------------------------------------------------------------------------------------
+     | -----------------------------------------------------------------
      */
+
     /**
      * The file path.
      *
@@ -40,10 +41,11 @@ class Json implements JsonContract, Arrayable, Jsonable, JsonSerializable
      */
     protected $attributes;
 
-    /* ------------------------------------------------------------------------------------------------
+    /* -----------------------------------------------------------------
      |  Constructor
-     | ------------------------------------------------------------------------------------------------
+     | -----------------------------------------------------------------
      */
+
     /**
      * Construct the Json instance.
      *
@@ -56,52 +58,17 @@ class Json implements JsonContract, Arrayable, Jsonable, JsonSerializable
         $this->loadFile($path);
     }
 
-    /**
-     * Load the json file.
-     *
-     * @param  string  $path
-     *
-     * @return self
-     */
-    public function loadFile($path)
-    {
-        $content = '{}';
-
-        if ( ! is_null($path)) {
-            $this->setPath($path);
-
-            $content = $this->filesystem->get($this->getPath());
-        }
-
-        return $this->loadContent($content);
-    }
-
-    /**
-     * Load the json content.
-     *
-     * @param  string  $content
-     *
-     * @return self
-     */
-    public function loadContent($content)
-    {
-        $this->attributes = Collection::make(
-            $this->decode($content)
-        );
-
-        return $this;
-    }
-
-    /* ------------------------------------------------------------------------------------------------
+    /* -----------------------------------------------------------------
      |  Getters & Setters
-     | ------------------------------------------------------------------------------------------------
+     | -----------------------------------------------------------------
      */
+
     /**
      * Set the filesystem instance.
      *
      * @param  \Illuminate\Filesystem\Filesystem  $filesystem
      *
-     * @return self
+     * @return static
      */
     public function setFilesystem(Filesystem $filesystem)
     {
@@ -125,7 +92,7 @@ class Json implements JsonContract, Arrayable, Jsonable, JsonSerializable
      *
      * @param  mixed  $path
      *
-     * @return self
+     * @return static
      */
     public function setPath($path)
     {
@@ -144,10 +111,11 @@ class Json implements JsonContract, Arrayable, Jsonable, JsonSerializable
         return $this->attributes;
     }
 
-    /* ------------------------------------------------------------------------------------------------
-     |  Main Functions
-     | ------------------------------------------------------------------------------------------------
+    /* -----------------------------------------------------------------
+     |  Main Methods
+     | -----------------------------------------------------------------
      */
+
     /**
      * Decode ths json content.
      *
@@ -223,6 +191,42 @@ class Json implements JsonContract, Arrayable, Jsonable, JsonSerializable
     }
 
     /**
+     * Load the json file.
+     *
+     * @param  string  $path
+     *
+     * @return static
+     */
+    public function loadFile($path)
+    {
+        $content = '{}';
+
+        if ( ! is_null($path)) {
+            $this->setPath($path);
+
+            $content = $this->filesystem->get($this->getPath());
+        }
+
+        return $this->loadContent($content);
+    }
+
+    /**
+     * Load the json content.
+     *
+     * @param  string  $content
+     *
+     * @return static
+     */
+    public function loadContent($content)
+    {
+        $this->attributes = Collection::make(
+            $this->decode($content)
+        );
+
+        return $this;
+    }
+
+    /**
      * Get the specified attribute from json file.
      *
      * @param  string      $key
@@ -241,7 +245,7 @@ class Json implements JsonContract, Arrayable, Jsonable, JsonSerializable
      * @param  string  $key
      * @param  mixed   $value
      *
-     * @return self
+     * @return static
      */
     public function set($key, $value)
     {
@@ -255,7 +259,7 @@ class Json implements JsonContract, Arrayable, Jsonable, JsonSerializable
      *
      * @param  array  $items
      *
-     * @return self
+     * @return static
      */
     public function merge(array $items)
     {
@@ -299,9 +303,12 @@ class Json implements JsonContract, Arrayable, Jsonable, JsonSerializable
      */
     public function __call($method, $arguments = [])
     {
-        return method_exists($this, $method)
-            ? call_user_func_array([$this, $method], $arguments)
-            : $this->attributes->get($method);
+        if ( ! method_exists($this, $method)) {
+            $arguments = [$method];
+            $method    = 'get';
+        }
+
+        return call_user_func_array([$this, $method], $arguments);
     }
 
     /**
@@ -357,7 +364,7 @@ class Json implements JsonContract, Arrayable, Jsonable, JsonSerializable
      */
     public function toJson($options = 0)
     {
-        return json_encode($this->toArray(), $options);
+        return static::encode($this->toArray(), $options);
     }
 
     /**
