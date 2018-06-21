@@ -11,20 +11,22 @@ use Arcanedev\Json\Exceptions;
  */
 class JsonTest extends TestCase
 {
-    /* ------------------------------------------------------------------------------------------------
+    /* -----------------------------------------------------------------
      |  Properties
-     | ------------------------------------------------------------------------------------------------
+     | -----------------------------------------------------------------
      */
-    /** @var Json */
+
+    /** @var \Arcanedev\Json\Json */
     private $json;
 
     /** @var string */
     private $fixturePath;
 
-    /* ------------------------------------------------------------------------------------------------
-     |  Main Functions
-     | ------------------------------------------------------------------------------------------------
+    /* -----------------------------------------------------------------
+     |  Main Methods
+     | -----------------------------------------------------------------
      */
+
     public function setUp()
     {
         parent::setUp();
@@ -40,16 +42,17 @@ class JsonTest extends TestCase
         parent::tearDown();
     }
 
-    /* ------------------------------------------------------------------------------------------------
-     |  Test Functions
-     | ------------------------------------------------------------------------------------------------
+    /* -----------------------------------------------------------------
+     |  Tests
+     | -----------------------------------------------------------------
      */
+
     /** @test */
     public function it_can_be_instantiated()
     {
-        $this->assertInstanceOf(Json::class, $this->json);
+        static::assertInstanceOf(Json::class, $this->json);
 
-        $this->assertEquals(
+        static::assertEquals(
             $this->convertFixture($this->fixturePath),
             $this->json->toArray()
         );
@@ -60,20 +63,20 @@ class JsonTest extends TestCase
     {
         $this->json = Json::make($this->fixturePath);
 
-        $this->assertInstanceOf(Json::class, $this->json);
+        static::assertInstanceOf(Json::class, $this->json);
 
-        $this->assertContains(
+        static::assertContains(
             (string) $this->json,
             $this->getFixtureContent($this->fixturePath)
         );
 
-        $this->assertEquals(
+        static::assertEquals(
             $this->convertFixture($this->fixturePath),
             $this->json->toArray()
         );
 
-        $this->assertJson($this->json->toJson());
-        $this->assertJson(json_encode($this->json));
+        static::assertJson($this->json->toJson());
+        static::assertJson(json_encode($this->json));
     }
 
     /** @test */
@@ -81,7 +84,7 @@ class JsonTest extends TestCase
     {
         $this->json = Json::fromContent('{"foo":"bar"}');
 
-        $this->assertSame(['foo' => 'bar'], $this->json->toArray());
+        static::assertSame(['foo' => 'bar'], $this->json->toArray());
     }
 
     /** @test */
@@ -89,35 +92,35 @@ class JsonTest extends TestCase
     {
         $fixture = $this->convertFixture($this->fixturePath);
 
-        $this->assertEquals($fixture['name'], $this->json->get('name'));
-        $this->assertEquals($fixture['name'], $this->json->name);
-        $this->assertEquals($fixture['name'], $this->json->name());
+        static::assertEquals($fixture['name'], $this->json->get('name'));
+        static::assertEquals($fixture['name'], $this->json->name);
+        static::assertEquals($fixture['name'], $this->json->name());
 
-        $this->assertEquals($fixture['description'], $this->json->get('description'));
-        $this->assertEquals($fixture['description'], $this->json->description);
-        $this->assertEquals($fixture['description'], $this->json->description());
+        static::assertEquals($fixture['description'], $this->json->get('description'));
+        static::assertEquals($fixture['description'], $this->json->description);
+        static::assertEquals($fixture['description'], $this->json->description());
 
-        $this->assertNull($this->json->get('url', null));
-        $this->assertNull($this->json->url);
-        $this->assertNull($this->json->url());
+        static::assertNull($this->json->get('url', null));
+        static::assertNull($this->json->url);
+        static::assertNull($this->json->url());
 
         $url = 'https://www.github.com';
         $this->json->set('url', $url);
 
-        $this->assertEquals($url, $this->json->get('url'));
-        $this->assertEquals($url, $this->json->url);
-        $this->assertEquals($url, $this->json->url());
+        static::assertEquals($url, $this->json->get('url'));
+        static::assertEquals($url, $this->json->url);
+        static::assertEquals($url, $this->json->url());
     }
 
     /** @test */
     public function it_can_set_and_get_path()
     {
-        $this->assertEquals($this->fixturePath, $this->json->getPath());
+        static::assertEquals($this->fixturePath, $this->json->getPath());
 
         $this->fixturePath = $this->getFixturesPath('file-2.json');
         $this->json->setPath($this->fixturePath);
 
-        $this->assertEquals($this->fixturePath, $this->json->getPath());
+        static::assertEquals($this->fixturePath, $this->json->getPath());
     }
 
     /** @test */
@@ -125,9 +128,9 @@ class JsonTest extends TestCase
     {
         $path = $this->getFixturesPath('saved.json');
 
-        $this->assertNotFalse($this->json->setPath($path)->save());
+        static::assertNotFalse($this->json->setPath($path)->save());
 
-        $this->assertEquals(
+        static::assertEquals(
             $this->getFixtureContent($path),
             $this->json->loadFile($path)
         );
@@ -140,18 +143,18 @@ class JsonTest extends TestCase
     {
         $path = $this->getFixturesPath('saved.json');
 
-        $this->assertEquals(5, count($this->json->attributes()));
+        static::assertEquals(5, count($this->json->attributes()));
 
         $saved = $this->json->setPath($path)->save();
 
-        $this->assertNotFalse($saved);
-        $this->assertEquals(
+        static::assertNotFalse($saved);
+        static::assertEquals(
             $this->getFixtureContent($path),
             $this->json->toJsonPretty()
         );
 
         $this->json->update(['url' => 'https://www.github.com']);
-        $this->assertEquals(6, count($this->json->attributes()));
+        static::assertEquals(6, count($this->json->attributes()));
 
         unlink($path);
     }
@@ -170,12 +173,12 @@ class JsonTest extends TestCase
     /** @test */
     public function it_can_encode()
     {
-        $this->assertSame(['test' => 123], Json::decode('{"test":123}'));
+        static::assertSame(['test' => 123], Json::decode('{"test":123}'));
 
         $expected = new \stdClass;
         $expected->test = 123;
 
-        $this->assertEquals($expected, Json::decode('{"test":123}', false));
+        static::assertEquals($expected, Json::decode('{"test":123}', false));
     }
 
     /**
@@ -192,8 +195,8 @@ class JsonTest extends TestCase
             $this->json->decode($json, false, 0, 2);
         }
         catch (Exceptions\JsonException $ex) {
-            $this->assertInstanceOf($class, $ex);
-            $this->assertSame($message, $ex->getMessage());
+            static::assertInstanceOf($class, $ex);
+            static::assertSame($message, $ex->getMessage());
         }
     }
 
@@ -253,8 +256,8 @@ class JsonTest extends TestCase
             $this->json->encode($content, 0, 5);
         }
         catch (Exceptions\JsonException $ex) {
-            $this->assertInstanceOf($class, $ex);
-            $this->assertSame($message, $ex->getMessage());
+            static::assertInstanceOf($class, $ex);
+            static::assertSame($message, $ex->getMessage());
         }
     }
 
@@ -299,10 +302,11 @@ class JsonTest extends TestCase
         ];
     }
 
-    /* ------------------------------------------------------------------------------------------------
-     |  Other Functions
-     | ------------------------------------------------------------------------------------------------
+    /* -----------------------------------------------------------------
+     |  Other Methods
+     | -----------------------------------------------------------------
      */
+
     /**
      * @param  string $path
      *

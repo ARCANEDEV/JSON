@@ -10,16 +10,17 @@ use Illuminate\Filesystem\Filesystem;
  */
 interface Json
 {
-    /* ------------------------------------------------------------------------------------------------
+    /* -----------------------------------------------------------------
      |  Getters & Setters
-     | ------------------------------------------------------------------------------------------------
+     | -----------------------------------------------------------------
      */
+
     /**
      * Set the filesystem instance.
      *
      * @param  \Illuminate\Filesystem\Filesystem  $filesystem
      *
-     * @return self
+     * @return static
      */
     public function setFilesystem(Filesystem $filesystem);
 
@@ -35,7 +36,7 @@ interface Json
      *
      * @param  mixed  $path
      *
-     * @return self
+     * @return static
      */
     public function setPath($path);
 
@@ -46,10 +47,11 @@ interface Json
      */
     public function attributes();
 
-    /* ------------------------------------------------------------------------------------------------
-     |  Main Functions
-     | ------------------------------------------------------------------------------------------------
+    /* -----------------------------------------------------------------
+     |  Main Methods
+     | -----------------------------------------------------------------
      */
+
     /**
      * Decode ths json content.
      *
@@ -108,7 +110,7 @@ interface Json
      * @param  string  $key
      * @param  mixed   $value
      *
-     * @return self
+     * @return static
      */
     public function set($key, $value);
 
@@ -117,7 +119,7 @@ interface Json
      *
      * @param  array  $items
      *
-     * @return self
+     * @return static
      */
     public function merge(array $items);
 

@@ -1,23 +1,26 @@
 <?php namespace Arcanedev\Json\Exceptions;
 
+use Exception;
+
 /**
  * Class     JsonException
  *
  * @package  Arcanedev\Json\Exceptions
  * @author   ARCANEDEV <arcanedev.maroc@gmail.com>
  */
-class JsonException extends \Exception
+class JsonException extends Exception
 {
-    /* ------------------------------------------------------------------------------------------------
-     |  Main Functions
-     | ------------------------------------------------------------------------------------------------
+    /* -----------------------------------------------------------------
+     |  Main Methods
+     | -----------------------------------------------------------------
      */
+
     /**
      * Replace message placeholders with replaces params.
      *
      * @param  array  $replaces
      *
-     * @return self
+     * @return static
      */
     public function replace(array $replaces = [])
     {

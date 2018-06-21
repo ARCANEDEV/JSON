@@ -11,10 +11,11 @@ use Arcanedev\Json\JsonErrorHandler;
  */
 class JsonErrorHandlerTest extends TestCase
 {
-    /* ------------------------------------------------------------------------------------------------
-     |  Test Functions
-     | ------------------------------------------------------------------------------------------------
+    /* -----------------------------------------------------------------
+     |  Tests
+     | -----------------------------------------------------------------
      */
+
     /**
      * @test
      *
@@ -32,8 +33,8 @@ class JsonErrorHandlerTest extends TestCase
             JsonErrorHandler::handleDecodeErrors($error, $options, $replaces);
         }
         catch (\Exception $ex) {
-            $this->assertInstanceOf($class, $ex);
-            $this->assertSame($msg, $ex->getMessage());
+            static::assertInstanceOf($class, $ex);
+            static::assertSame($msg, $ex->getMessage());
         }
     }
 
@@ -113,8 +114,8 @@ class JsonErrorHandlerTest extends TestCase
             JsonErrorHandler::handleEncodeErrors($error, $options, $replaces);
         }
         catch (\Exception $ex) {
-            $this->assertInstanceOf($class, $ex);
-            $this->assertSame($msg, $ex->getMessage());
+            static::assertInstanceOf($class, $ex);
+            static::assertSame($msg, $ex->getMessage());
         }
     }
 
