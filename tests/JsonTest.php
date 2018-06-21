@@ -59,6 +59,19 @@ class JsonTest extends TestCase
     }
 
     /** @test */
+    public function it_can_be_instantiated_with_helper()
+    {
+        $json = \json();
+
+        static::assertInstanceOf(Json::class, $json);
+
+        static::assertEquals(
+            $this->convertFixture($this->fixturePath),
+            $json->loadFile($this->fixturePath)->toArray()
+        );
+    }
+
+    /** @test */
     public function it_can_make()
     {
         $this->json = Json::make($this->fixturePath);

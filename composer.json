@@ -28,7 +28,7 @@
         "psr-4": {
             "Arcanedev\\Json\\": "src/"
         },
-        "files": ["constants.php"]
+        "files": ["constants.php", "helpers.php"]
     },
     "autoload-dev": {
         "psr-4": {
