@@ -1,6 +1,6 @@
 <?php namespace Arcanedev\Json\Tests;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase as BaseTestCase;
 
 /**
  * Class     TestCase
@@ -8,7 +8,7 @@ use PHPUnit_Framework_TestCase;
  * @package  Arcanedev\Json\Tests
  * @author   ARCANEDEV <arcanedev.maroc@gmail.com>
  */
-abstract class TestCase extends PHPUnit_Framework_TestCase
+abstract class TestCase extends BaseTestCase
 {
     /* -----------------------------------------------------------------
      |  Other Methods
